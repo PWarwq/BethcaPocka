@@ -1,26 +1,165 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  BetchaPokah — "the card room at 2am"
+  Baize green table, brass rail, bone card faces, oxide red for all-in.
+*/
+@theme {
+  --color-baize-950: #070c0a;
+  --color-baize-900: #0b1210;
+  --color-baize-800: #12211c;
+  --color-baize-700: #1a3229;
+  --color-baize-600: #22453a;
+
+  --color-felt-600: #1e4636;
+  --color-felt-500: #26604a;
+  --color-felt-400: #2f7a5e;
+
+  --color-brass-300: #e6cf92;
+  --color-brass-400: #d9bc72;
+  --color-brass-500: #c8a250;
+  --color-brass-600: #a5823a;
+  --color-brass-700: #7d6230;
+
+  --color-bone-50: #faf6ee;
+  --color-bone-100: #f4eee2;
+  --color-bone-200: #e6ddcb;
+  --color-bone-300: #cfc4ac;
+  --color-bone-400: #a99e86;
+
+  --color-oxide-400: #c85c3e;
+  --color-oxide-500: #b04a2f;
+  --color-oxide-600: #8c3823;
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-archivo);
+
+  --radius-card: 0.375rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-baize-950);
+    color: var(--color-bone-100);
+    font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv01";
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numbers are chip stacks — they must not jitter as they tick. */
+  .tabular,
+  [class*="tabular"] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass-400);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-brass-500);
+    color: var(--color-baize-950);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* The one orchestrated moment on the page: a royal flush deals onto felt. */
+@keyframes deal-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-64px) rotate(var(--fan-rot)) scale(0.93);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(7px) rotate(var(--fan-rot)) scale(1.015);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(var(--fan-lift)) rotate(var(--fan-rot)) scale(1);
+  }
+}
+
+@keyframes lamp-settle {
+  0% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@layer components {
+  .deal-card {
+    /* `both` is essential, not decoration: `backwards` only fills the delay,
+       so once the animation ends the cards snap back to their un-rotated,
+       un-offset base style and the fan collapses. `forwards` is what keeps the
+       fanned shape on screen after the last card lands. */
+    animation: deal-in 760ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+    animation-delay: var(--deal-delay, 0ms);
+    will-change: transform, opacity;
+  }
+
+  /* Woven baize. Two offset dot-weaves read as cloth without an image. */
+  .felt-weave {
+    background-image:
+      radial-gradient(
+        circle at 1px 1px,
+        rgb(0 0 0 / 0.16) 1px,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 1px 1px,
+        rgb(255 255 255 / 0.03) 1px,
+        transparent 0
+      );
+    background-size: 4px 4px, 4px 4px;
+    background-position: 0 0, 2px 2px;
+  }
+
+  /* The pool of light a table lamp throws on the felt. */
+  .lamp-pool {
+    background-image: radial-gradient(
+      120% 90% at 50% 0%,
+      var(--color-felt-500) 0%,
+      var(--color-baize-800) 45%,
+      var(--color-baize-950) 100%
+    );
+  }
+
+  /* Hairline brass rule — the table rail. */
+  .rail-top {
+    box-shadow: inset 0 1px 0 0
+      color-mix(in srgb, var(--color-brass-600) 40%, transparent);
+  }
+
+  .rule-brass {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-brass-600) 55%, transparent) 12%,
+      color-mix(in srgb, var(--color-brass-500) 70%, transparent) 50%,
+      color-mix(in srgb, var(--color-brass-600) 55%, transparent) 88%,
+      transparent
+    );
+  }
 }
